@@ -1,0 +1,46 @@
+# Unity generated
+[Ll]ibrary/
+[Tt]emp/
+[Oo]bj/
+[Bb]uild/
+[Bb]uilds/
+[Ll]ogs/
+[Uu]ser[Ss]ettings/
+[Mm]emoryCaptures/
+[Rr]ecordings/
+
+# Unity crash / dev
+sysinfo.txt
+*.stackdump
+crashlytics-build.properties
+
+# Asset meta data (Unity owns these; keep .meta but ignore temp)
+/.vs/
+/.idea/
+/.vscode/
+*.csproj
+*.unityproj
+*.sln
+*.suo
+*.user
+*.userprefs
+*.pidb
+*.booproj
+*.svd
+*.pdb
+*.mdb
+*.opendb
+*.VC.db
+
+# OS
+.DS_Store
+
+# Builds / packages
+*.apk
+*.aab
+*.unitypackage
+*.app
+
+# OpenCode local
+.opencode/cache/
+.opencode/tmp/
