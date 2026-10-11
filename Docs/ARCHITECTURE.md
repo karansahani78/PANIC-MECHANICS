@@ -126,7 +126,7 @@ the stack is verified.
 `Tools/SimVerify/` is a standalone .NET NUnit project (`net10.0`, `LangVersion 9.0`)
 that links `Core` + `Gameplay` source and the `Tests/EditMode` files directly, so
 the pure gameplay rules compile and test without the Unity Editor. Latest actual
-result: **57 passed / 0 failed**. This is the fallback test path until the editor
+result: **59 passed / 0 failed**. This is the fallback test path until the editor
 is licensed; the same test files also run under Unity Test Framework (EditMode).
 
 ## 4. Runtime services & composition
