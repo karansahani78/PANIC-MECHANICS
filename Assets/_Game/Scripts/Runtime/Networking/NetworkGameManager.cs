@@ -25,6 +25,13 @@ namespace PanicMechanics.Runtime
         private readonly NetworkList<SubsystemNetState> _subsystems =
             new NetworkList<SubsystemNetState>();
 
+        public const byte OutcomeNone = 255;
+
+        private readonly NetworkVariable<byte> _outcome = new NetworkVariable<byte>(
+            OutcomeNone,
+            NetworkVariableReadPermission.Everyone,
+            NetworkVariableWritePermission.Server);
+
         public NetworkVariable<GamePhase> Phase
         {
             get { return _phase; }
@@ -38,6 +45,11 @@ namespace PanicMechanics.Runtime
         public NetworkList<SubsystemNetState> Subsystems
         {
             get { return _subsystems; }
+        }
+
+        public NetworkVariable<byte> Outcome
+        {
+            get { return _outcome; }
         }
 
         public event System.Action<InteractionResultCode, string> InteractionResolved;
@@ -98,6 +110,7 @@ namespace PanicMechanics.Runtime
             boot.Director.EnterLobby();
             boot.Director.StartMission();
             _phase.Value = boot.Director.Phase;
+            _outcome.Value = OutcomeNone;
             RefreshSubsystems();
         }
 
@@ -188,6 +201,13 @@ namespace PanicMechanics.Runtime
             _phase.Value = director.Phase;
             _elapsed.Value = director.Elapsed;
             RefreshSubsystems();
+
+            if (director.Phase == GamePhase.Debrief &&
+                director.Result != null &&
+                _outcome.Value == OutcomeNone)
+            {
+                _outcome.Value = (byte)director.Result.Outcome;
+            }
         }
 
         private void RefreshSubsystems()

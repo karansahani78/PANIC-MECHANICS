@@ -102,7 +102,7 @@ namespace PanicMechanics.Runtime
 
             if (phaseLabel != null)
             {
-                phaseLabel.text = manager.Phase.Value.ToString();
+                phaseLabel.text = BuildPhaseText(manager);
             }
 
             if (timerLabel != null)
@@ -141,6 +141,18 @@ namespace PanicMechanics.Runtime
             {
                 _role = (PlayerRole)_localAvatar.RoleValue;
             }
+        }
+
+        private static string BuildPhaseText(NetworkGameManager manager)
+        {
+            string phase = manager.Phase.Value.ToString();
+            byte outcome = manager.Outcome.Value;
+            if (outcome == NetworkGameManager.OutcomeNone || manager.Phase.Value != GamePhase.Debrief)
+            {
+                return phase;
+            }
+
+            return phase + " — " + ((MissionOutcome)outcome).ToString().ToUpperInvariant();
         }
 
         private string BuildSubsystemText(NetworkGameManager manager)

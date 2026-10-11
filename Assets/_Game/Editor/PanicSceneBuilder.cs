@@ -229,9 +229,13 @@ namespace PanicMechanics.EditorTools
             CreateStation("Station_Overheat", new Vector3(0f, 0.5f, 6f),
                 "overheat", "open_cooling_valve", "Open coolant valve [E]");
             CreateStation("Station_PowerFault", new Vector3(4f, 0.5f, 6f),
-                "powerfault", "reset_breaker", "Reset breaker [E]");
+                "powerfault", "reset_breaker", "Reset breaker [E] (reduce load first)");
+            CreateStation("Station_PowerLoad", new Vector3(4f, 0.5f, 9f),
+                "powerfault", "reduce_engine_load", "Reduce engine load [E]");
             CreateStation("Station_BrakeLeak", new Vector3(-4f, 0.5f, 6f),
                 "brakeleak", "close_brake_valve", "Close brake valve [E]");
+            CreateStation("Station_BrakeRecharge", new Vector3(-4f, 0.5f, 9f),
+                "brakeleak", "recharge_brakes", "Recharge brake pressure [E]");
 
             var bootstrapGo = new GameObject("GameBootstrap");
             var bootstrap = bootstrapGo.AddComponent<GameBootstrap>();
