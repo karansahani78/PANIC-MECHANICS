@@ -1,0 +1,25 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 8731e7157c27f45f284a760cda18e3b9, type: 3}
+  m_Name: Incident_brakeleak
+  m_EditorClassIdentifier: PanicMechanics.Data::PanicMechanics.Data.IncidentDefinitionSO
+  Id: brakeleak
+  Kind: 2
+  Subsystem: 3
+  ActivateAfterSeconds: 90
+  SeverityWeight: 1
+  SymptomTemperature: 0.55
+  EscalateTemperature: 0.7
+  FailTemperature: 0.98
+  StabilizeTemperature: 0.3
+  StableHoldSeconds: 2
+  ReduceLoadAmount: 0.15

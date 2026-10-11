@@ -1,0 +1,22 @@
+{
+    "name": "PanicMechanics.Runtime",
+    "rootNamespace": "PanicMechanics.Runtime",
+    "references": [
+        "PanicMechanics.Core",
+        "PanicMechanics.Gameplay",
+        "PanicMechanics.Data",
+        "Unity.Netcode.Runtime",
+        "Unity.InputSystem",
+        "Unity.TextMeshPro",
+        "UnityEngine.UI"
+    ],
+    "includePlatforms": [],
+    "excludePlatforms": [],
+    "allowUnsafeCode": false,
+    "overrideReferences": false,
+    "precompiledReferences": [],
+    "autoReferenced": true,
+    "defineConstraints": [],
+    "versionDefines": [],
+    "noEngineReferences": false
+}
