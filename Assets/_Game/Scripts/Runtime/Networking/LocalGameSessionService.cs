@@ -25,7 +25,7 @@ namespace PanicMechanics.Runtime
 
             SetStatus(SessionStatus.Creating);
             bool started = nm.StartHost();
-            SetStatus(started ? SessionStatus.Hosted : SessionStatus.Failed);
+            SetStatus(started ? SessionStatus.Hosting : SessionStatus.Failed);
 
             return Task.FromResult(started
                 ? SessionOperationResult.Ok(LoopbackCode, "Hosting locally on loopback")
