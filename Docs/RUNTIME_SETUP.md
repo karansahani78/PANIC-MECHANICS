@@ -1,16 +1,45 @@
 # PANIC MECHANICS — Runtime Setup (Unity Editor steps)
 
-**Status: UNVERIFIED.** Everything under `Assets/_Game/Scripts/Runtime/` was
-written without a licensed editor, so it has **not** been compiled. Treat it as
-scaffolding: open the project, fix any compile errors, then wire the scene per the
-steps below. The pure core (`Core`, `Gameplay`) is separately verified — see
-`README.md`.
+**Status: VERIFIED (2026-10-11).** The project compiles in batchmode with zero
+errors and the host smoke test passes. The runtime layer now lives in its own
+`PanicMechanics.Runtime` assembly.
+
+## Generated already (no manual steps required)
+
+The editor tool `PanicSceneBuilder`
+(`Assets/_Game/Editor/PanicSceneBuilder.cs`, menu **Panic Mechanics → Build
+Playable Slice**) generates and commits:
+
+- `Assets/_Game/Content/Incidents/Incident_{overheat,powerfault,brakeleak}.asset`
+- `Assets/_Game/Content/Missions/Mission_Derail.asset`
+- `Assets/_Game/Prefabs/Player.prefab`
+- `Assets/_Game/Scenes/00_Bootstrap.unity` (added to Build Settings)
+- TextMeshPro Essential Resources (via **Panic Mechanics → Import TMP Essentials**)
+
+Re-run it any time with:
+
+```text
+Unity -batchmode -nographics -quit -projectPath <repo> \
+  -executeMethod PanicMechanics.EditorTools.PanicSceneBuilder.BuildAll
+```
+
+Automated checks (batchmode):
+
+```text
+# EditMode + PlayMode
+Unity -batchmode -nographics -projectPath <repo> -runTests \
+  -testPlatform EditMode -testResults /tmp/editmode.xml
+Unity -batchmode -nographics -projectPath <repo> -runTests \
+  -testPlatform PlayMode -testResults /tmp/playmode.xml
+```
+
+The manual steps below document what the tool builds and how to smoke-test it.
 
 ## What the runtime layer contains
 
-Assembly: `Assembly-CSharp` (no asmdef on purpose, so it auto-references the
-`Core`/`Gameplay`/`Data` asmdefs and all package assemblies without
-package-reference churn). Split into asmdefs after the smoke test passes.
+Assembly: `PanicMechanics.Runtime` (refs `Core`/`Gameplay`/`Data` + NGO, Input
+System, TextMeshPro, uGUI). Split from `Assembly-CSharp` once the stack was
+verified.
 
 | File | Role |
 |---|---|
@@ -60,10 +89,13 @@ id + action + distance and never mutates state (see `Docs/CONTRACTS.md` §5).
 
 ## Two-client smoke test
 
-1. Open the project in Unity **6000.3.26f1**; fix any compile errors.
+The **host** leg is automated (`HostSmokeTests`, PlayMode, passing). The
+**client-join** leg is still manual:
+
+1. Open the project in Unity **6000.3.26f1**.
 2. Use **Multiplayer Play Mode** (Window → Multiplayer Play Mode) with one virtual
-   player, or build two instances.
-3. Instance A → **Host**; Instance B → **Join** (`LOCAL`).
+   player, or build two instances, both loading `00_Bootstrap`.
+3. Instance A → click **Host**; Instance B → click **Join** (`LOCAL`).
 4. Expected: both see the same `Phase`/timer/subsystem values; a client walking to
    a station and pressing **E** triggers a host-validated interaction and the
    feedback key appears on the client HUD.

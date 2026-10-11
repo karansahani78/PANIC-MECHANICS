@@ -28,12 +28,18 @@ See `PANIC_MECHANICS_BLUEPRINT.md` for the full brief.
 
 ## Build / test request
 
-Unity is not yet installed on this machine, so the project cannot be opened or
-compiled yet. Once bootstrapped, agents must run:
+Unity **6000.3.26f1 is installed and licensed**; the project compiles and tests
+run. Agents must run:
 
-- Compile: open the project in Unity 6.3 LTS (or Unity batchmode `-quit -batchmode -logFile`).
-- Tests: Unity Test Framework EditMode + PlayMode via Test Runner / `-runTests`.
+- Compile: `Unity -batchmode -nographics -quit -projectPath <repo> -logFile <log>`
+  (expect exit 0, zero `error CS`).
+- Tests: `Unity -batchmode -nographics -projectPath <repo> -runTests
+  -testPlatform EditMode|PlayMode -testResults <xml>`.
+- Standalone pure-core tests: `Tools/run-tests.sh` (`dotnet test`).
 - Record **actual** pass/fail counts; if a suite cannot run, say so.
+
+Latest actual baseline (2026-10-11): compile clean; EditMode 69/69; PlayMode 1/1;
+standalone 69/69.
 
 ## Skills
 
@@ -56,5 +62,8 @@ Full write perms: `Docs/AGENT_TASKS.md`.
 
 ## Status
 
-Foundation only. Do not start full parallel implementation until the integrator
-has bootstrapped the project and the two-client smoke test passes.
+Bootstrapped — the project compiles clean, EditMode 69/69 and PlayMode 1/1 pass,
+and the `00_Bootstrap` playable slice is generated. The **two-client** (host +
+joining client) smoke test is the remaining Milestone 0 gate; until it passes on
+the pinned package set, avoid broad parallel feature work and keep changes scoped
+to owned folders.
