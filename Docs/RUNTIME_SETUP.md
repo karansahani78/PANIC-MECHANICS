@@ -1,10 +1,11 @@
 # PANIC MECHANICS — Runtime Setup (Unity Editor steps)
 
 **Status: VERIFIED (2026-10-12).** The project compiles in batchmode with zero
-errors; EditMode 87/87, PlayMode 1 passed / 4 gated-skip, SimVerify 87/87, and the
+errors; EditMode 93/93, PlayMode 1 passed / 4 gated-skip, SimVerify 93/93, and the
 two-client loopback smoke test pass. The runtime layer now lives in its own
-`PanicMechanics.Runtime` assembly. Live Relay is implemented and unit-covered but
-**not yet verified** (no Cloud project linked).
+`PanicMechanics.Runtime` assembly; `HudController` renders the local player's
+host-assigned role and only that role's subsystem diagnostics. Live Relay is
+implemented and unit-covered but **not yet verified** (no Cloud project linked).
 
 ## Generated already (no manual steps required)
 
@@ -52,7 +53,7 @@ verified.
 | `Runtime/Networking/SubsystemNetState.cs` | `INetworkSerializable` snapshot of a `TrainSubsystemState` |
 | `Runtime/Player/PlayerAvatar.cs` | Owner-driven CharacterController + Input System move/look/interact; `_role` server-authorized on spawn |
 | `Runtime/Interaction/InteractableStation.cs` | Marker with `targetId`/`actionId`/`prompt` on a collider |
-| `Runtime/UI/HudController.cs` | Reads replicated state into TMP labels |
+| `Runtime/UI/HudController.cs` | Reads replicated state into TMP labels; role label + role-filtered diagnostics via `DiagnosticPanel` (creates `RoleLabel` at runtime if unwired) |
 | `Runtime/UI/SessionMenuController.cs` | Host/Join buttons → `IGameSessionService`; shows a runtime status/join-code label |
 
 ## Session backends

@@ -296,11 +296,16 @@ namespace PanicMechanics.EditorTools
                 new Vector2(0.5f, 0f), new Vector2(0f, 40f), string.Empty);
             feedback.alignment = TextAlignmentOptions.Center;
 
+            var role = CreateLabel(canvasGo.transform, "RoleLabel",
+                new Vector2(1f, 1f), new Vector2(-20f, -160f), "Role:");
+            role.alignment = TextAlignmentOptions.TopRight;
+
             var hud = canvasGo.AddComponent<HudController>();
             SetPrivate(hud, "phaseLabel", phase);
             SetPrivate(hud, "timerLabel", timer);
             SetPrivate(hud, "subsystemLabel", subsystems);
             SetPrivate(hud, "feedbackLabel", feedback);
+            SetPrivate(hud, "roleLabel", role);
 
             var esGo = new GameObject("EventSystem");
             esGo.AddComponent<EventSystem>();

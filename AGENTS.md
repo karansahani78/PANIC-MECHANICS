@@ -38,10 +38,11 @@ run. Agents must run:
 - Standalone pure-core tests: `Tools/run-tests.sh` (`dotnet test`).
 - Record **actual** pass/fail counts; if a suite cannot run, say so.
 
-Latest actual baseline (2026-10-12): compile clean; EditMode **87/87**; PlayMode
-**1 passed / 4 gated-skip / 0 failed**; standalone **87/87**; **two-client loopback
+Latest actual baseline (2026-10-12): compile clean; EditMode **93/93**; PlayMode
+**1 passed / 4 gated-skip / 0 failed**; standalone **93/93**; **two-client loopback
 smoke test automated and passing** (host 1/1 on a project clone, client 1/1 joining
-over loopback, asserting host-assigned roles Engineer/Electrician). Relay smoke
+over loopback, asserting host-assigned roles Engineer/Electrician). Role-based HUD
+(local role + role-filtered subsystem diagnostics via `DiagnosticPanel`). Relay smoke
 fixtures exist but are **gated off** (`PM_RELAY=1`, needs a linked Unity Cloud
 project) and **have not been verified against live clients**.
 
@@ -77,11 +78,18 @@ end-to-end; `RequestRoleServerRpc` removed).
 implements `IGameSessionService` over the unified `com.unity.services.multiplayer`
 Sessions + Relay API; `GameBootstrap` selects it via `SessionBackend` or
 `PM_SESSION_BACKEND=ugs` (default stays `Local` for offline/tests). Error mapping is
-pure/tested (`PanicMechanics.Core.SessionErrorText`). Verified: EditMode **87/87**,
-PlayMode 1 passed/4 gated-skip, SimVerify **87/87**, loopback smoke PASS. **Live
+pure/tested (`PanicMechanics.Core.SessionErrorText`). Verified: EditMode **93/93**,
+PlayMode 1 passed/4 gated-skip, SimVerify **93/93**, loopback smoke PASS. **Live
 Relay is unverified** — blocked on linking a Unity Cloud project (see
 `Docs/RUNTIME_SETUP.md`); `Tools/relay-smoke.sh` (`PM_RELAY=1`) is the gate. Do not
 claim live Relay works until that script passes.
+
+**Role-based HUD added (2026-10-12)** — `HudController` shows the local player's
+host-assigned role and only the subsystem diagnostics that role can see, driven by
+`RoleInformationService`/`PlayerRoleProfile` through the pure, tested
+`PanicMechanics.Gameplay.Diagnostics.DiagnosticPanel`. EditMode **93/93**; loopback
+smoke PASS. HUD text is verified by unit tests + compiled/run in the scene, not by a
+visual/GUI assertion.
 
 Broad parallel feature work may resume; keep changes scoped to owned folders and
 re-run the smoke scripts before claiming network changes.

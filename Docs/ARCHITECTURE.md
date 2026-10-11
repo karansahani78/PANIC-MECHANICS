@@ -1,8 +1,8 @@
 # PANIC MECHANICS — Architecture
 
-**Status:** Integrated. Unity-free gameplay core verified (87/87 standalone NUnit
+**Status:** Integrated. Unity-free gameplay core verified (93/93 standalone NUnit
 tests); Unity Editor `6000.3.26f1` licensed and compiling clean; Unity Test
-Framework EditMode **87/87** and PlayMode **1 passed / 4 gated-skip**; the
+Framework EditMode **93/93** and PlayMode **1 passed / 4 gated-skip**; the
 **two-client loopback smoke test is automated and passing**
 (`Tools/two-client-smoke.sh`, host on a project clone + client over loopback, both
 1/1), including host-authoritative role assignment (host Engineer, joiner
@@ -24,6 +24,7 @@ Implemented today:
 - `Assets/_Game/Scripts/Gameplay/` — `PanicMechanics.Gameplay.asmdef` (pure; no engine refs)
   - `Simulation/` — train model, mission director, incidents (overheat/powerfault/brakeleak), scoring, event log, report
   - `Interaction/` — `InteractionService` (host validation routing + expert cooldown advantage), `IncidentInteractionTarget`, `RoleInformationService`, `RoleExpertise`
+  - `Diagnostics/` — `DiagnosticService` (per-subsystem readings/status) + `DiagnosticPanel` (role-filtered HUD panel text)
   - `Missions/` — `MissionConfig`/`IncidentConfig` + `MissionBuilder` (content → director, applies difficulty)
   - `Lobby/` — `RoleAssignmentService`
 - `Assets/_Game/Scripts/Data/` — `PanicMechanics.Data.asmdef` (engine; ScriptableObject defs)
@@ -139,8 +140,8 @@ Services Multiplayer/Core/Authentication).
 `Tools/SimVerify/` is a standalone .NET NUnit project (`net10.0`, `LangVersion 9.0`)
 that links `Core` + `Gameplay` source and the `Tests/EditMode` files directly, so
 the pure gameplay rules compile and test without the Unity Editor. Latest actual
-result: **87 passed / 0 failed**. The same test files also run under Unity Test
-Framework (EditMode **87/87**), which additionally runs the PlayMode host smoke
+result: **93 passed / 0 failed**. The same test files also run under Unity Test
+Framework (EditMode **93/93**), which additionally runs the PlayMode host smoke
 test (**1/1**, plus 4 gated-skip fixtures). The two-client loopback smoke test runs
 as two separate Unity processes (`Tools/two-client-smoke.sh`); each fixture asserts
 `Ignore` unless `PM_TWOCLIENT=1`. The Relay smoke test
@@ -194,7 +195,7 @@ and `Docs/CONTRACTS.md` §5.
    codes and `PanicMechanics.Core.SessionErrorText` maps MPS `SessionError`s to
    user text (unit-tested); host-ended/removed sessions transition to
    `Disconnected`; UI surfacing pending
-8. Automated tests run and **actual** results are recorded. — PASS (EditMode 87/87,
-   PlayMode 1 passed/4 gated-skip, two-client smoke 1/1 / 1/1, standalone 87/87)
+8. Automated tests run and **actual** results are recorded. — PASS (EditMode 93/93,
+   PlayMode 1 passed/4 gated-skip, two-client smoke 1/1 / 1/1, standalone 93/93)
 
 A phase is not done while a P0/P1 defect blocks its acceptance criteria.

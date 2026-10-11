@@ -9,15 +9,16 @@ Unity Multiplayer Services (sessions/Relay).
 ## Repository status
 
 **Playable vertical slice — Unity Editor integrated, tests green, two-client
-loopback smoke test automated and passing; Relay adapter implemented (2026-10-12).**
+loopback smoke test automated and passing; Relay adapter implemented; role-based HUD
+(2026-10-12).**
 
 - Unity Editor **6000.3.26f1 (Apple Silicon)** is installed and **licensed**.
 - The project opens in batchmode with **zero compile errors**; `.meta`,
   `Packages/packages-lock.json`, `ProjectSettings/*` and URP/network default assets
   are generated and committed.
 - The gameplay core (enums/contracts/models + simulation + interaction validation)
-  is **Unity-free** and verified: `dotnet test` → **87 passed / 0 failed**.
-- **Unity Test Framework:** EditMode **87/87**, PlayMode **1 passed / 4 gated-skip**.
+  is **Unity-free** and verified: `dotnet test` → **93 passed / 0 failed**.
+- **Unity Test Framework:** EditMode **93/93**, PlayMode **1 passed / 4 gated-skip**.
 - The runtime layer (`PanicMechanics.Runtime` asmdef) is verified to compile and to
   boot a host-authoritative mission headlessly — see
   [`Docs/RUNTIME_SETUP.md`](Docs/RUNTIME_SETUP.md).
@@ -72,13 +73,13 @@ the `Core` + `Gameplay` source directly (Unity-free rules verification):
 
 ```text
 $ dotnet test Tools/SimVerify/SimVerify.csproj
-Passed!  - Failed: 0, Passed: 87, Skipped: 0, Total: 87
+Passed!  - Failed: 0, Passed: 93, Skipped: 0, Total: 93
 ```
 
 **Unity Test Framework** (batchmode on the licensed editor):
 
 ```text
-EditMode : Failed: 0, Passed: 87, Total: 87
+EditMode : Failed: 0, Passed: 93, Total: 93
 PlayMode : Failed: 0, Passed:  1, Total:  1   (HostStartsMissionAndAdvances;
                                     4 fixtures ignored unless PM_TWOCLIENT=1 / PM_RELAY=1)
 Two-client loopback smoke (automated): HOST 1/1 + CLIENT 1/1 over 127.0.0.1:7777
@@ -93,12 +94,13 @@ Covered: `TrainSystemModel`, the three incidents (`OverheatIncident`,
 (phase/distance/cooldown/rejection routing + result-source passthrough),
 `IncidentInteractionTarget`, `MissionBuilder`/`MissionConfig`,
 `RoleAssignmentService`, `RoleInformationService`, `MatchLobby`,
-`DiagnosticService`, `RoleExpertise` (host-assigned roles + expert cooldown
-advantage), and `SessionErrorText` (MPS session error → user text). PlayMode boots
-the built scene, starts a host, asserts the mission reaches `Running`, the clock
-advances, subsystem state replicates, and (host + joining client) roles are assigned
-and enforced by the host. Relay PlayMode fixtures are gated off until a Cloud
-project is linked.
+`DiagnosticService`, `DiagnosticPanel` (role-filtered HUD diagnostics), `RoleExpertise`
+(host-assigned roles + expert cooldown advantage), and `SessionErrorText` (MPS session
+error → user text). PlayMode boots the built scene, starts a host, asserts the mission
+reaches `Running`, the clock advances, subsystem state replicates, and (host + joining
+client) roles are assigned and enforced by the host. The HUD shows each player their
+own role and only the subsystems that role can see. Relay PlayMode fixtures are gated
+off until a Cloud project is linked.
 
 **Not yet verified:** Relay/`MultiplayerServicesSessionService` internet joins —
 implemented and unit-covered, but blocked on linking a Unity Cloud project (see
@@ -108,8 +110,8 @@ implemented and unit-covered, but blocked on linking a Unity Cloud project (see
 
 1. Link the project to a Unity Cloud project (enable Authentication/Relay/Sessions),
    then run `Tools/relay-smoke.sh` to verify live Relay joins.
-2. Expand content/UI/audio and the role-based HUD (each player sees their own
-   diagnostics via `RoleInformationService`).
+2. Expand content/UI/audio: richer HUD (input-driven feedback, incident alerts),
+   additional scenes, and the `Player`/`Networking`/`UI` asmdef split.
 
 ## Agent foundation
 

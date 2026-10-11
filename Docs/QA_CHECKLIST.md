@@ -6,8 +6,9 @@ Owner: Agent 5 (Content + QA). Executed by humans/agents per milestone.
 
 - [x] Unity project opens in the pinned 6.3 LTS patch, zero compile errors. —
       2026-10-12, batchmode `-quit`: 0 `error CS` (all assemblies).
-- [x] EditMode: full suite green. — 2026-10-12, **87/87** (includes the session
-      error-mapping tests `SessionErrorTextTests`).
+- [x] EditMode: full suite green. — 2026-10-12, **93/93** (includes the session
+      error-mapping tests `SessionErrorTextTests` and the role-filtered
+      `DiagnosticPanelTests`).
 - [ ] EditMode: system dependency calculations.
 - [ ] EditMode: fault escalation thresholds.
 - [ ] EditMode: repair precondition validation.
@@ -33,7 +34,9 @@ Owner: Agent 5 (Content + QA). Executed by humans/agents per milestone.
       (`Tools/relay-smoke.sh`, `PM_RELAY=1`); **NOT RUN** — needs a linked Unity
       Cloud project. Not a pass until the script is green.
 - [ ] PlayMode: HUD reacts to state changes. — Client HUD shows replicated values;
-      input-driven HUD polish pending.
+      local role + role-filtered subsystem diagnostics via `DiagnosticPanel` (pure
+      text covered by EditMode `DiagnosticPanelTests`; not GUI-asserted). Input-driven
+      HUD polish pending.
 
 ## Manual multiplayer QA (real remote required for final validation)
 
