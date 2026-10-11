@@ -94,8 +94,18 @@ namespace PanicMechanics.Gameplay.Interaction
             }
 
             target.HandleAcceptedInteraction(context, request.ActionId);
-            _readyAt[key] = context.Time + DefaultCooldownSeconds;
-            return InteractionResult.Ok("interaction.accepted", 0);
+
+            var source = target as IInteractionResultSource;
+            var outcome = source != null
+                ? source.LastResult
+                : InteractionResult.Ok("interaction.accepted", 0);
+
+            if (outcome.Accepted)
+            {
+                _readyAt[key] = context.Time + DefaultCooldownSeconds;
+            }
+
+            return outcome;
         }
 
         public void ClearCooldowns()

@@ -56,6 +56,24 @@ namespace PanicMechanics.Gameplay.Simulation
             get { return Phase == IncidentPhase.Resolved || Phase == IncidentPhase.Failed; }
         }
 
+        public bool CanAttempt(
+            string actionId, PlayerInteractionContext context, out InteractionResultCode reason)
+        {
+            if (IsTerminal)
+            {
+                reason = InteractionResultCode.AlreadyResolved;
+                return false;
+            }
+
+            if (Phase == IncidentPhase.Dormant)
+            {
+                reason = InteractionResultCode.WrongPhase;
+                return false;
+            }
+
+            return CanPerform(actionId, context, out reason);
+        }
+
         protected virtual float ActivateAt
         {
             get { return 0f; }
@@ -89,8 +107,7 @@ namespace PanicMechanics.Gameplay.Simulation
         }
 
         public InteractionResult TryRepair(InteractionRequest request, PlayerInteractionContext context)
-        {
-            Attempts++;
+        {            Attempts++;
             Log.Append(MissionTime, 0, MissionEventType.ActionAttempted,
                 context.PlayerId, Id, Subsystem, request.ActionId);
 

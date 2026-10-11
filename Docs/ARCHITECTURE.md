@@ -15,15 +15,17 @@ Implemented today:
 
 - `Assets/_Game/Scripts/Core/` — `PanicMechanics.Core.asmdef` (pure; no engine refs)
 - `Assets/_Game/Scripts/Gameplay/` — `PanicMechanics.Gameplay.asmdef` (pure; no engine refs)
-  - `Simulation/` — train model, mission director, incidents, scoring, event log, report
-  - `Interaction/` — `InteractionService` (host validation routing), `RoleInformationService`
+  - `Simulation/` — train model, mission director, incidents (overheat/powerfault/brakeleak), scoring, event log, report
+  - `Interaction/` — `InteractionService` (host validation routing), `IncidentInteractionTarget`, `RoleInformationService`
 - `Assets/_Game/Scripts/Data/` — `PanicMechanics.Data.asmdef` (engine; ScriptableObject defs)
+- `Assets/_Game/Scripts/Runtime/` — **engine/network layer, no asmdef (Assembly-CSharp), UNVERIFIED**: `GameBootstrap`, `LocalGameSessionService`, `NetworkGameManager`, `PlayerAvatar`, `InteractableStation`, `HudController`, `SessionMenuController`
 - `Assets/_Game/Tests/EditMode/` — `PanicMechanics.Tests.EditMode.asmdef`
 - `Tools/SimVerify/` — standalone .NET harness compiling `Core` + `Gameplay` for CI-less verification
+- `Docs/RUNTIME_SETUP.md` — editor scene/prefab wiring + smoke-test steps
 
 Deferred until after the two-client smoke test (per `AGENTS.md` and §3):
-`Scripts/Player`, `Scripts/Networking`, `Scripts/UI`, their asmdefs, scenes and
-prefabs. Target layout:
+Relay/`MultiplayerServicesSessionService`, `Player`/`Networking`/`UI` asmdefs,
+scenes and prefabs. Target layout:
 
 ```text
 game/                               # repo root == Unity project root (after bootstrap)
@@ -122,7 +124,7 @@ the stack is verified.
 `Tools/SimVerify/` is a standalone .NET NUnit project (`net10.0`, `LangVersion 9.0`)
 that links `Core` + `Gameplay` source and the `Tests/EditMode` files directly, so
 the pure gameplay rules compile and test without the Unity Editor. Latest actual
-result: **35 passed / 0 failed**. This is the fallback test path until the editor
+result: **49 passed / 0 failed**. This is the fallback test path until the editor
 is licensed; the same test files also run under Unity Test Framework (EditMode).
 
 ## 4. Runtime services & composition

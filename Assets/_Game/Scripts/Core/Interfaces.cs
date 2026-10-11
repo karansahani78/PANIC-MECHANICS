@@ -58,6 +58,11 @@ namespace PanicMechanics.Core
         void HandleAcceptedInteraction(PlayerInteractionContext context, string actionId);
     }
 
+    public interface IInteractionResultSource
+    {
+        InteractionResult LastResult { get; }
+    }
+
     public interface IMissionService
     {
         GamePhase CurrentPhase { get; }

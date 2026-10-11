@@ -14,10 +14,14 @@ Unity Multiplayer Services (sessions/Relay).
 - The Unity project scaffold exists: `Packages/manifest.json`,
   `ProjectSettings/ProjectVersion.txt`, assembly definitions, and content folders.
 - The gameplay core (enums/contracts/models + simulation + interaction validation)
-  is **Unity-free** and verified: `dotnet test` → **35 passed / 0 failed**.
+  is **Unity-free** and verified: `dotnet test` → **49 passed / 0 failed**.
+- A host-authoritative runtime scaffold exists under
+  `Assets/_Game/Scripts/Runtime/` (session service, network replication,
+  interaction relay, player, HUD) but is **unverified** — see
+  [`Docs/RUNTIME_SETUP.md`](Docs/RUNTIME_SETUP.md).
 - The editor has **not** been opened yet, so `.meta` files, package restore, scene
-  wiring and the two-client smoke test are still pending. The single blocker is
-  Unity license activation, which requires an interactive sign-in.
+  wiring, Unity compile and the two-client smoke test are still pending. The single
+  blocker is Unity license activation, which requires an interactive sign-in.
 
 See [`Docs/ARCHITECTURE.md`](Docs/ARCHITECTURE.md) and
 [`Docs/AGENT_TASKS.md`](Docs/AGENT_TASKS.md).
@@ -53,25 +57,28 @@ source directly, mirroring Unity C# 9 and the NUnit constraint API).
 
 ```text
 $ dotnet test Tools/SimVerify/SimVerify.csproj
-Passed!  - Failed: 0, Passed: 35, Skipped: 0, Total: 35
+Passed!  - Failed: 0, Passed: 49, Skipped: 0, Total: 49
 ```
 
-Covered: `TrainSystemModel`, `OverheatIncident`, `MissionDirector`,
-`MissionScorer`/report, `InteractionService` (phase/distance/cooldown/rejection
-routing), `RoleInformationService` role visibility.
+Covered: `TrainSystemModel`, the three incidents (`OverheatIncident`,
+`PowerFaultIncident`, `BrakeLeakIncident`), `MissionDirector`,
+`MissionScorer`/report, `DifficultyScaler`, `InteractionService`
+(phase/distance/cooldown/rejection routing + result-source passthrough),
+`IncidentInteractionTarget`, and `RoleInformationService` role visibility.
 
-**Not yet verified:** Unity compile of the `Data` ScriptableObjects and engine
-layer, package restore, and the two-client multiplayer smoke test. These require
-opening the licensed editor.
+**Not yet verified:** Unity compile of `Data` + `Runtime`, package restore, and
+the two-client multiplayer smoke test. These require opening the licensed editor.
 
 ## Next steps
 
 1. **Activate a Unity license** (one interactive step; see below).
 2. Open the project in Unity 6.3 LTS `6000.3.26f1`; let it generate `.meta` files,
    resolve packages, and write `Packages/packages-lock.json`.
-3. Build the `00_Bootstrap` scene + engine-car prototype.
-4. Implement the NGO + Multiplayer Services session adapter and the host-authoritative
-   interaction relay, then run the **two-client smoke test** before feature work.
+3. Build the `00_Bootstrap` scene + engine-car prototype (see
+   [`Docs/RUNTIME_SETUP.md`](Docs/RUNTIME_SETUP.md)).
+4. Implement the Relay/`MultiplayerServicesSessionService` adapter (loopback
+   session service already exists), then run the **two-client smoke test** before
+   feature work.
 
 ### Activating the license (required, interactive)
 

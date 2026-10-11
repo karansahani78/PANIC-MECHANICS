@@ -1,6 +1,7 @@
 # PANIC MECHANICS — Shared Interface Contracts (FROZEN)
 
-**Status:** Frozen by Agent 0 (Integrator). Version `contracts-v1`.
+**Status:** Frozen by Agent 0 (Integrator). Version `contracts-v1.1` (v1 plus the
+additive `IInteractionResultSource` interface; no existing member changed).
 **Owner:** Integrator only. No agent may edit these types or enums without a
 written proposal approved by the integrator.
 
@@ -81,9 +82,14 @@ public interface IGameSessionService
 public interface IInteractionTarget
 {
     string TargetId { get; }
-    bool CanInteract(PlayerInteractionContext context, string actionId,
-                     out InteractionResultCode rejectionReason);
+    bool CanInteract(PlayerInteractionContext context, string actionId, out InteractionResultCode rejectionReason);
     void HandleAcceptedInteraction(PlayerInteractionContext context, string actionId);
+}
+
+// Added in contracts-v1.1 (additive; no existing member changed)
+public interface IInteractionResultSource
+{
+    InteractionResult LastResult { get; }
 }
 
 public interface IMissionService

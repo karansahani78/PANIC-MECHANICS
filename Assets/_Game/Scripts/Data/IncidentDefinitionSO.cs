@@ -35,6 +35,10 @@ namespace PanicMechanics.Data
                         StableHoldSeconds = StableHoldSeconds,
                         ReduceLoadAmount = ReduceLoadAmount
                     };
+                case IncidentKind.PowerFault:
+                    return new PowerFaultIncident(model, log, ActivateAfterSeconds);
+                case IncidentKind.BrakeLeak:
+                    return new BrakeLeakIncident(model, log, ActivateAfterSeconds);
                 default:
                     Debug.LogError("Incident kind not yet implemented: " + Kind +
                                    " (" + Id + ")");
