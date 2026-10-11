@@ -1,0 +1,35 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+
+  <!--
+    Standalone verification harness.
+    Compiles the Unity-free simulation source directly so the pure gameplay
+    rules can be built and tested on this machine without the Unity Editor.
+    Mirrors Unity's C# language level (C# 9) and NUnit constraint API so the
+    same test files also run under Unity Test Framework (EditMode).
+  -->
+
+  <PropertyGroup>
+    <TargetFramework>net10.0</TargetFramework>
+    <LangVersion>9.0</LangVersion>
+    <ImplicitUsings>disable</ImplicitUsings>
+    <Nullable>disable</Nullable>
+    <IsPackable>false</IsPackable>
+    <AssemblyName>PanicMechanics.SimVerify</AssemblyName>
+    <RootNamespace>PanicMechanics.SimVerify</RootNamespace>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <PackageReference Include="coverlet.collector" Version="6.0.4" />
+    <PackageReference Include="Microsoft.NET.Test.Sdk" Version="17.14.0" />
+    <PackageReference Include="NUnit" Version="4.3.2" />
+    <PackageReference Include="NUnit.Analyzers" Version="4.7.0" />
+    <PackageReference Include="NUnit3TestAdapter" Version="5.0.0" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <Compile Include="..\..\Assets\_Game\Scripts\Core\**\*.cs" LinkBase="Shared\Core" />
+    <Compile Include="..\..\Assets\_Game\Scripts\Gameplay\**\*.cs" LinkBase="Shared\Gameplay" />
+    <Compile Include="..\..\Assets\_Game\Tests\EditMode\**\*.cs" LinkBase="Shared\Tests\EditMode" />
+  </ItemGroup>
+
+</Project>

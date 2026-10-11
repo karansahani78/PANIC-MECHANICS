@@ -8,48 +8,86 @@ Unity Multiplayer Services (sessions/Relay).
 
 ## Repository status
 
-**Foundation only — no Unity project yet.** This machine does **not** currently
-have Unity Hub/Editor, `git-lfs`, or the .NET SDK installed, so the Unity project
-cannot be created or compiled here. The agent foundation (skills, contracts,
-architecture, ownership) is in place and ready for bootstrap.
+**Scaffolded — awaiting Unity Editor license activation.**
 
-See [`Docs/ARCHITECTURE.md`](Docs/ARCHITECTURE.md) for the assessment and
-[`Docs/AGENT_TASKS.md`](Docs/AGENT_TASKS.md) for agent ownership.
+- Unity Editor **6000.3.26f1 (Apple Silicon)** is installed via Unity Hub.
+- The Unity project scaffold exists: `Packages/manifest.json`,
+  `ProjectSettings/ProjectVersion.txt`, assembly definitions, and content folders.
+- The gameplay core (enums/contracts/models + simulation + interaction validation)
+  is **Unity-free** and verified: `dotnet test` → **35 passed / 0 failed**.
+- The editor has **not** been opened yet, so `.meta` files, package restore, scene
+  wiring and the two-client smoke test are still pending. The single blocker is
+  Unity license activation, which requires an interactive sign-in.
 
-## Pinned baseline (verified against Unity 6.3 LTS docs, 2026-10-11)
+See [`Docs/ARCHITECTURE.md`](Docs/ARCHITECTURE.md) and
+[`Docs/AGENT_TASKS.md`](Docs/AGENT_TASKS.md).
 
-| Item | Version |
-|---|---|
-| Unity Editor | 6.3 LTS, `6000.3.x` (pin exact patch at install) |
-| `com.unity.netcode.gameobjects` | 2.13.3 |
-| `com.unity.services.multiplayer` | 2.4.0 |
-| `com.unity.inputsystem` | 1.20.1 |
-| `com.unity.multiplayer.playmode` | 2.0.2 |
-| `com.unity.multiplayer.tools` | 2.2.12 |
-| `com.unity.test-framework` | 1.6.x (core, editor-matched) |
-| `com.unity.render-pipelines.universal` | 17.3.x (core, editor-matched) |
-| `com.unity.ugui` | editor-matched (uGUI + TextMeshPro) |
+## Pinned baseline
 
-Do not upgrade packages without integrator approval. NGO 3.x targets Unity 6000.7.
+Editor pinned to **6000.3.26f1** (`ProjectVersion.txt`). Package versions below
+are the set **bundled/validated by that exact editor** (taken from the editor's
+own package cache and URP project template, not guessed):
 
-## Bootstrap steps (needs Unity Hub + git-lfs installed)
+| Item | Version | Source |
+|---|---|---|
+| Unity Editor | `6000.3.26f1` | Unity Hub / installed |
+| `com.unity.netcode.gameobjects` | 2.13.3 | editor package cache |
+| `com.unity.services.multiplayer` | 2.3.3 | editor package cache |
+| `com.unity.inputsystem` | 1.20.0 | editor package cache |
+| `com.unity.multiplayer.playmode` | 2.0.2 | editor package cache |
+| `com.unity.multiplayer.tools` | 2.2.12 | editor package cache |
+| `com.unity.render-pipelines.universal` | 17.0.1 | URP project template |
+| `com.unity.test-framework` | 1.4.2 | URP project template |
+| `com.unity.ugui` | 2.0.0 | URP project template (incl. TextMeshPro) |
 
-1. Install **Unity Hub** and the latest **Unity 6.3 LTS (`6000.3.x`)** editor.
-2. Install **Git LFS** (`brew install git-lfs && git lfs install`).
-3. Create a new 3D (URP) project at this repository root, or open it so Unity
-   generates `Packages/`, `ProjectSettings/`, `Assets/` and `.meta` files.
-4. Add the pinned packages above via Package Manager, then commit
-   `Packages/manifest.json` + `Packages/packages-lock.json`.
-5. Record the exact editor patch in `ProjectSettings/ProjectVersion.txt` and here.
-6. Run the **two-client smoke test** (host + client) before feature work.
-7. Freeze contracts from [`Docs/CONTRACTS.md`](Docs/CONTRACTS.md) into
-   `Assets/_Game/Scripts/Core/`.
+> The Unity docs pages advertise slightly newer patches (e.g. MPS 2.4.0, Input
+> System 1.20.1). The versions above are what `6000.3.26f1` itself ships/caches
+> for offline use, so they are the safest pin. Do not upgrade packages without
+> integrator approval. NGO 3.x targets Unity 6000.7.
+
+## Verification (actual results, 2026-10-11)
+
+The pure simulation is compiled and tested standalone — no Unity required — via
+`Tools/SimVerify/` (a .NET NUnit project that includes the `Core` + `Gameplay`
+source directly, mirroring Unity C# 9 and the NUnit constraint API).
+
+```text
+$ dotnet test Tools/SimVerify/SimVerify.csproj
+Passed!  - Failed: 0, Passed: 35, Skipped: 0, Total: 35
+```
+
+Covered: `TrainSystemModel`, `OverheatIncident`, `MissionDirector`,
+`MissionScorer`/report, `InteractionService` (phase/distance/cooldown/rejection
+routing), `RoleInformationService` role visibility.
+
+**Not yet verified:** Unity compile of the `Data` ScriptableObjects and engine
+layer, package restore, and the two-client multiplayer smoke test. These require
+opening the licensed editor.
+
+## Next steps
+
+1. **Activate a Unity license** (one interactive step; see below).
+2. Open the project in Unity 6.3 LTS `6000.3.26f1`; let it generate `.meta` files,
+   resolve packages, and write `Packages/packages-lock.json`.
+3. Build the `00_Bootstrap` scene + engine-car prototype.
+4. Implement the NGO + Multiplayer Services session adapter and the host-authoritative
+   interaction relay, then run the **two-client smoke test** before feature work.
+
+### Activating the license (required, interactive)
+
+The editor refuses batchmode/headless work until a license exists
+(`No valid Unity Editor license found`). To unblock:
+
+1. Open **Unity Hub** → **Sign in** with a Unity account.
+2. **Preferences → Licenses → Add → Get a free personal license** (or a Pro seat).
+3. Re-run headless builds/tests, or just open the project in the editor.
 
 ## Agent foundation
 
 - [`AGENTS.md`](AGENTS.md) — project rules for all agents
-- `Docs/CONTRACTS.md` — frozen shared enums/models/interfaces
+- `Docs/CONTRACTS.md` — frozen shared enums/models/interfaces (`contracts-v1`)
 - `Docs/ARCHITECTURE.md` — folder layout, asmdef boundaries, tech baseline
 - `Docs/AGENT_TASKS.md` — ownership map, dependency graph, first task
 - `Docs/QA_CHECKLIST.md` — quality gates
 - `.opencode/skills/` — 8 project skills (see `AGENTS.md`)
+- `Tools/SimVerify/` — standalone Unity-free test harness

@@ -8,6 +8,7 @@
 [Uu]ser[Ss]ettings/
 [Mm]emoryCaptures/
 [Rr]ecordings/
+[Bb]in/
 
 # Unity crash / dev
 sysinfo.txt
@@ -34,6 +35,9 @@ crashlytics-build.properties
 
 # OS
 .DS_Store
+
+# Standalone verification harness (Tools/SimVerify) keeps its csproj
+!Tools/SimVerify/*.csproj
 
 # Builds / packages
 *.apk
