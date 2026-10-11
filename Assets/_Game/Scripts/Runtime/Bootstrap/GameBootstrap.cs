@@ -55,7 +55,10 @@ namespace PanicMechanics.Runtime
             Director = MissionBuilder.Build(config);
             Interactions = new InteractionService(() => Director.Phase)
             {
-                MaxDistance = IncidentController.MaxInteractionDistance
+                MaxDistance = IncidentController.MaxInteractionDistance,
+                DefaultCooldownSeconds = 0.8f,
+                ExpertCooldownMultiplier = 0.25f,
+                IsExpertFor = RoleExpertise.IsExpert
             };
             Director.PhaseChanged += OnPhaseChanged;
 

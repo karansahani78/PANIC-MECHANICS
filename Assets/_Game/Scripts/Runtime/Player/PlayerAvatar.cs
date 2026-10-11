@@ -1,3 +1,4 @@
+using PanicMechanics.Core;
 using Unity.Netcode;
 using UnityEngine;
 using UnityEngine.InputSystem;
@@ -23,6 +24,14 @@ namespace PanicMechanics.Runtime
             get { return _role.Value; }
         }
 
+        public void AuthorizeRole(PlayerRole role)
+        {
+            if (IsServer)
+            {
+                _role.Value = (byte)role;
+            }
+        }
+
         private void Awake()
         {
             _controller = GetComponent<CharacterController>();
@@ -30,6 +39,16 @@ namespace PanicMechanics.Runtime
 
         public override void OnNetworkSpawn()
         {
+            if (IsServer)
+            {
+                var manager = NetworkGameManager.Instance;
+                if (manager != null && manager.IsSpawned)
+                {
+                    manager.EnsureAuthoritativeRoles();
+                    AuthorizeRole(manager.GetAuthoritativeRole(OwnerClientId));
+                }
+            }
+
             if (IsOwner)
             {
                 if (viewCamera != null)
@@ -102,16 +121,6 @@ namespace PanicMechanics.Runtime
             {
                 TryInteract();
             }
-
-            if (keyboard.digit1Key.wasPressedThisFrame)
-            {
-                RequestRoleServerRpc(0);
-            }
-
-            if (keyboard.digit2Key.wasPressedThisFrame)
-            {
-                RequestRoleServerRpc(1);
-            }
         }
 
         private void TryInteract()
@@ -138,12 +147,6 @@ namespace PanicMechanics.Runtime
             {
                 manager.SubmitInteractionServerRpc(station.TargetId, station.ActionId, hit.distance);
             }
-        }
-
-        [ServerRpc]
-        private void RequestRoleServerRpc(byte role)
-        {
-            _role.Value = role;
         }
     }
 }

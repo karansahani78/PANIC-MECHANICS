@@ -21,6 +21,10 @@ Owner: Agent 5 (Content + QA). Executed by humans/agents per milestone.
 - [x] PlayMode: invalid client interaction rejected by host. — 2026-10-11, same run:
       client `SubmitInteractionServerRpc(no_such_target,…)` → `InvalidTarget`
       returned and asserted by the client.
+- [x] PlayMode: roles are host-assigned and enforced. — 2026-10-11, same run: host
+      avatar Engineer + joining client Electrician asserted on both sides; relay
+      uses the host-assigned role; expert cooldown advantage verified in EditMode
+      (`RoleExpertise` + `InteractionRoleAdvantage`).
 - [ ] PlayMode: HUD reacts to state changes. — Client HUD shows replicated values;
       input-driven HUD polish pending.
 

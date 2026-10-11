@@ -45,9 +45,9 @@ verified.
 |---|---|
 | `Runtime/Bootstrap/GameBootstrap.cs` | Builds `MissionDirector` + `InteractionService`, registers incident interaction targets, owns `LocalGameSessionService` |
 | `Runtime/Networking/LocalGameSessionService.cs` | `IGameSessionService` over NGO loopback (host/client on `127.0.0.1`) — dev/smoke-test only |
-| `Runtime/Networking/NetworkGameManager.cs` | Host-authoritative: ticks the sim, replicates phase/elapsed/subsystem states, validates interaction `ServerRpc`s |
+| `Runtime/Networking/NetworkGameManager.cs` | Host-authoritative: ticks the sim, replicates phase/elapsed/subsystem states, assigns roles (join order), validates interaction `ServerRpc`s with the assigned role |
 | `Runtime/Networking/SubsystemNetState.cs` | `INetworkSerializable` snapshot of a `TrainSubsystemState` |
-| `Runtime/Player/PlayerAvatar.cs` | Owner-driven CharacterController + Input System move/look/interact |
+| `Runtime/Player/PlayerAvatar.cs` | Owner-driven CharacterController + Input System move/look/interact; `_role` server-authorized on spawn |
 | `Runtime/Interaction/InteractableStation.cs` | Marker with `targetId`/`actionId`/`prompt` on a collider |
 | `Runtime/UI/HudController.cs` | Reads replicated state into TMP labels |
 | `Runtime/UI/SessionMenuController.cs` | Host/Join buttons → `IGameSessionService` |
@@ -103,11 +103,13 @@ TWO_CLIENT_SMOKE_PASS    # HOST 1/1 + CLIENT 1/1 over 127.0.0.1:7777
   unless `PM_TWOCLIENT=1`, so ordinary EditMode/PlayMode runs don't time out.
   The script exports it before launching either editor.
 - Host fixture writes a marker, waits for a real client join **and** its
-  departure, then asserts the mission reached `Running`, the clock advanced, and
-  subsystems replicated. The client fixture joins via
-  `IGameSessionService.JoinByCodeAsync("LOCAL")`, asserts the replicated
-  phase/clock/subsystem count, then sends an invalid interaction `ServerRpc` and
-  asserts the host-validated `InvalidTarget` rejection comes back over the wire.
+  departure, then asserts the mission reached `Running`, the clock advanced,
+  subsystems replicated, and host-authoritative roles: the host avatar is
+  **Engineer** and the joining client is assigned **Electrician**. The client
+  fixture joins via `IGameSessionService.JoinByCodeAsync("LOCAL")`, asserts the
+  replicated phase/clock/subsystem count and its own assigned role
+  (Electrician), then sends an invalid interaction `ServerRpc` and asserts the
+  host-validated `InvalidTarget` rejection comes back over the wire.
 - Debug artifacts (logs + XML) are copied to `/tmp/pm-smoke-latest`.
 
 Manual alternative (uses the same loopback path; not needed for the gate):

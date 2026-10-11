@@ -38,9 +38,10 @@ run. Agents must run:
 - Standalone pure-core tests: `Tools/run-tests.sh` (`dotnet test`).
 - Record **actual** pass/fail counts; if a suite cannot run, say so.
 
-Latest actual baseline (2026-10-11): compile clean; EditMode 69/69; PlayMode 1/1;
-standalone 69/69; **two-client smoke test automated and passing** (host 1/1 on a
-project clone, client 1/1 joining over loopback).
+Latest actual baseline (2026-10-11): compile clean; EditMode 78/78; PlayMode 1/1;
+standalone 78/78; **two-client smoke test automated and passing** (host 1/1 on a
+project clone, client 1/1 joining over loopback, asserting host-assigned roles
+Engineer/Electrician).
 
 ## Skills
 
@@ -63,9 +64,11 @@ Full write perms: `Docs/AGENT_TASKS.md`.
 
 ## Status
 
-**Milestone 0 complete (2026-10-11)** — the project compiles clean, EditMode 69/69
-and PlayMode 1/1 pass, the `00_Bootstrap` playable slice is generated, and the
+**Milestone 0 complete (2026-10-11)** — the project compiles clean, EditMode 78/78
+and PlayMode 1/1 pass, the `00_Bootstrap` playable slice is generated, the
 **two-client** (host + joining client) smoke test is **automated and passing** on
 the pinned package set (`Tools/two-client-smoke.sh`; both fixtures `Assert.Ignore`
-unless `PM_TWOCLIENT=1`). Broad parallel feature work may resume; keep changes
-scoped to owned folders and re-run the smoke script before claiming network changes.
+unless `PM_TWOCLIENT=1`), and **roles are host-assigned and enforced**
+(Engineer/Electrician verified end-to-end; `RequestRoleServerRpc` removed). Broad
+parallel feature work may resume; keep changes scoped to owned folders and re-run
+the smoke script before claiming network changes.

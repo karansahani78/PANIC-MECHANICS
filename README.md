@@ -16,8 +16,8 @@ smoke test automated and passing (2026-10-11).**
   `Packages/packages-lock.json`, `ProjectSettings/*` and URP/network default assets
   are generated and committed.
 - The gameplay core (enums/contracts/models + simulation + interaction validation)
-  is **Unity-free** and verified: `dotnet test` → **69 passed / 0 failed**.
-- **Unity Test Framework:** EditMode **69/69**, PlayMode **1/1** (host smoke test).
+  is **Unity-free** and verified: `dotnet test` → **78 passed / 0 failed**.
+- **Unity Test Framework:** EditMode **78/78**, PlayMode **1/1** (host smoke test).
 - The runtime layer (`PanicMechanics.Runtime` asmdef) is verified to compile and to
   boot a host-authoritative mission headlessly — see
   [`Docs/RUNTIME_SETUP.md`](Docs/RUNTIME_SETUP.md).
@@ -26,7 +26,8 @@ smoke test automated and passing (2026-10-11).**
 - The **two-client** (host + joining client) smoke test is **automated and
   passing**: `Tools/two-client-smoke.sh` boots a host on an APFS clone of the
   project and a client on the repo over loopback, and asserts mission state
-  replication plus a host-validated interaction round trip.
+  replication, host-authoritative role assignment (host Engineer, joiner
+  Electrician), and a host-validated interaction round trip.
 
 See [`Docs/ARCHITECTURE.md`](Docs/ARCHITECTURE.md) and
 [`Docs/AGENT_TASKS.md`](Docs/AGENT_TASKS.md).
@@ -66,13 +67,13 @@ the `Core` + `Gameplay` source directly (Unity-free rules verification):
 
 ```text
 $ dotnet test Tools/SimVerify/SimVerify.csproj
-Passed!  - Failed: 0, Passed: 69, Skipped: 0, Total: 69
+Passed!  - Failed: 0, Passed: 78, Skipped: 0, Total: 78
 ```
 
 **Unity Test Framework** (batchmode on the licensed editor):
 
 ```text
-EditMode : Failed: 0, Passed: 69, Total: 69
+EditMode : Failed: 0, Passed: 78, Total: 78
 PlayMode : Failed: 0, Passed:  1, Total:  1   (HostStartsMissionAndAdvances;
                                     2 two-client fixtures ignored unless PM_TWOCLIENT=1)
 Two-client smoke (automated): HOST 1/1 + CLIENT 1/1 over 127.0.0.1:7777
@@ -86,19 +87,21 @@ Covered: `TrainSystemModel`, the three incidents (`OverheatIncident`,
 `MissionScorer`/report, `DifficultyScaler`, `InteractionService`
 (phase/distance/cooldown/rejection routing + result-source passthrough),
 `IncidentInteractionTarget`, `MissionBuilder`/`MissionConfig`,
-`RoleAssignmentService`, `RoleInformationService`, `MatchLobby`, and
-`DiagnosticService`. PlayMode boots the built scene, starts a host, and asserts the
-mission reaches `Running`, the clock advances, and subsystem state replicates.
+`RoleAssignmentService`, `RoleInformationService`, `MatchLobby`,
+`DiagnosticService`, and `RoleExpertise` (host-assigned roles + expert
+cooldown advantage). PlayMode boots the built scene, starts a host, asserts the
+mission reaches `Running`, the clock advances, subsystem state replicates, and
+(host + joining client) roles are assigned and enforced by the host.
 
 **Not yet verified:** Relay/`MultiplayerServicesSessionService` internet joins
-(loopback only), per-player role binding on the interaction relay.
+(loopback only).
 
 ## Next steps
 
 1. Implement the Relay/`MultiplayerServicesSessionService` adapter (loopback
    session service already exists) behind `IGameSessionService`.
-2. Bind per-player roles authoritatively (the interaction relay currently uses a
-   placeholder role) and expand content/UI/audio.
+2. Expand content/UI/audio and the role-based HUD (each player sees their own
+   diagnostics via `RoleInformationService`).
 
 ## Agent foundation
 

@@ -116,6 +116,22 @@ Diagnostic visibility by role:
 `RoleAssignmentService.Assign` gives 2–4 clients distinct roles in
 Engineer/Electrician/Driver/Dispatcher order; more clients than roles throws.
 
+**Authoritative binding (`NetworkGameManager`, host only):** roles are assigned by
+the host in join order (host → Engineer, first client → Electrician, …) on every
+connect/disconnect, using `RoleAssignmentService`. The interaction relay uses the
+host-assigned role — clients never send a role, so a client cannot claim a
+privileged role. Each `PlayerAvatar._role` (server-writable) replicates the
+assigned role to its owner.
+
+**Small advantage, not exclusive access (`RoleExpertise` + `InteractionService`):**
+an "expert" role matches the incident it specializes in
+(Engineer→overheat, Electrician→powerfault, Driver→brakeleak; Dispatcher is
+expert for every target — the fallback role). Expert roles pay a reduced
+interaction cooldown (`InteractionService.DefaultCooldownSeconds *
+ExpertCooldownMultiplier`; runtime wiring: 0.8s × 0.25 = 0.2s); non-experts pay
+the full 0.8s. This enforces a role advantage without making any incident
+unsolvable when a role is absent. Unknown targets are permissive for every role.
+
 ## Interaction validation (`InteractionService`)
 
 Host-only pipeline for a client action request:
@@ -123,7 +139,9 @@ Host-only pipeline for a client action request:
 1. Target must exist → else `InvalidTarget`.
 2. Phase must equal `RequiredPhase` (Running) → else `WrongPhase`.
 3. `Distance ≤ MaxDistance` → else `TooFar`.
-4. Per (player, target, action) cooldown → else `Cooldown`.
+4. Per (player, target, action) cooldown → else `Cooldown`. The cooldown is
+   scaled by `ExpertCooldownMultiplier` when `IsExpertFor(role, targetId)` is
+   true (expert advantage step).
 5. Target `CanInteract` precondition → else its reason.
 6. Apply, then return the target's `IInteractionResultSource.LastResult` (the
    incident's real feedback key), setting a cooldown only if accepted.

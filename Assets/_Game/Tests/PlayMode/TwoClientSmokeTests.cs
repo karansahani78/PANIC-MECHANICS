@@ -98,12 +98,31 @@ namespace PanicMechanics.Tests.PlayMode
             Debug.Log("[PM] HOST_READY");
 
             bool sawClient = false;
+            int? joinedClientRole = null;
             deadline = Time.realtimeSinceStartup + 240f;
             while (Time.realtimeSinceStartup < deadline)
             {
                 if (nm.ConnectedClients.Count >= 2)
                 {
                     sawClient = true;
+                    if (joinedClientRole == null)
+                    {
+                        foreach (var pair in nm.ConnectedClients)
+                        {
+                            if (pair.Key == nm.LocalClientId)
+                            {
+                                continue;
+                            }
+
+                            var avatar = pair.Value.PlayerObject != null
+                                ? pair.Value.PlayerObject.GetComponent<PlayerAvatar>()
+                                : null;
+                            if (avatar != null)
+                            {
+                                joinedClientRole = avatar.RoleValue;
+                            }
+                        }
+                    }
                 }
 
                 if (sawClient && nm.ConnectedClients.Count < 2)
@@ -115,6 +134,8 @@ namespace PanicMechanics.Tests.PlayMode
             }
 
             Assert.That(sawClient, Is.True, "a client joined the host");
+            Assert.That(joinedClientRole, Is.EqualTo((byte)PlayerRole.Electrician),
+                "host assigned Electrician to the joining client (second in join order)");
 
             var manager = NetworkGameManager.Instance;
             Assert.That(manager.Phase.Value, Is.EqualTo(GamePhase.Running), "mission Running on host");
@@ -125,6 +146,21 @@ namespace PanicMechanics.Tests.PlayMode
 
             Assert.That(manager.Subsystems.Count, Is.EqualTo(NetworkGameManager.SubsystemCount),
                 "subsystem states replicated on host");
+
+            var hostAvatar = nm.LocalClient != null && nm.LocalClient.PlayerObject != null
+                ? nm.LocalClient.PlayerObject.GetComponent<PlayerAvatar>()
+                : null;
+            Assert.That(hostAvatar, Is.Not.Null, "host player avatar spawned");
+
+            deadline = Time.realtimeSinceStartup + 20f;
+            while (hostAvatar.RoleValue != (byte)PlayerRole.Engineer &&
+                   Time.realtimeSinceStartup < deadline)
+            {
+                yield return null;
+            }
+
+            Assert.That(hostAvatar.RoleValue, Is.EqualTo((byte)PlayerRole.Engineer),
+                "host avatar assigned Engineer (first in join order)");
         }
     }
 
@@ -229,6 +265,20 @@ namespace PanicMechanics.Tests.PlayMode
 
             Assert.That(manager.Subsystems.Count, Is.EqualTo(NetworkGameManager.SubsystemCount),
                 "client receives replicated subsystem states");
+
+            var player = nm.LocalClient != null ? nm.LocalClient.PlayerObject : null;
+            Assert.That(player, Is.Not.Null, "client player avatar spawned");
+            var avatar = player.GetComponent<PlayerAvatar>();
+
+            deadline = Time.realtimeSinceStartup + 20f;
+            while (avatar.RoleValue != (byte)PlayerRole.Electrician &&
+                   Time.realtimeSinceStartup < deadline)
+            {
+                yield return null;
+            }
+
+            Assert.That(avatar.RoleValue, Is.EqualTo((byte)PlayerRole.Electrician),
+                "client assigned Electrician by host (second in join order)");
 
             InteractionResultCode roundTrip = InteractionResultCode.WrongPhase;
             bool gotRejection = false;

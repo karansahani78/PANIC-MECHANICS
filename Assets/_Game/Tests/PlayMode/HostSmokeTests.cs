@@ -87,6 +87,21 @@ namespace PanicMechanics.Tests.PlayMode
 
             Assert.That(manager.Subsystems.Count, Is.EqualTo(NetworkGameManager.SubsystemCount),
                 "subsystems replicated to clients");
+
+            var avatar = nm.LocalClient != null && nm.LocalClient.PlayerObject != null
+                ? nm.LocalClient.PlayerObject.GetComponent<PlayerAvatar>()
+                : null;
+            Assert.That(avatar, Is.Not.Null, "host player avatar spawned");
+
+            timeout = Time.realtimeSinceStartup + 20f;
+            while (avatar.RoleValue != (byte)PlayerRole.Engineer &&
+                   Time.realtimeSinceStartup < timeout)
+            {
+                yield return null;
+            }
+
+            Assert.That(avatar.RoleValue, Is.EqualTo((byte)PlayerRole.Engineer),
+                "host avatar assigned Engineer (first in join order)");
         }
     }
 }

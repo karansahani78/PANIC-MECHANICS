@@ -16,7 +16,10 @@ namespace PanicMechanics.Gameplay.Interaction
 
         public float MaxDistance = 3f;
         public float DefaultCooldownSeconds = 0f;
+        public float ExpertCooldownMultiplier = 1f;
         public GamePhase RequiredPhase = GamePhase.Running;
+
+        public Func<PlayerRole, string, bool> IsExpertFor;
 
         public InteractionService(Func<GamePhase> phaseProvider)
         {
@@ -102,10 +105,25 @@ namespace PanicMechanics.Gameplay.Interaction
 
             if (outcome.Accepted)
             {
-                _readyAt[key] = context.Time + DefaultCooldownSeconds;
+                float cooldown = CooldownFor(context, request.TargetId);
+                if (cooldown > 0f)
+                {
+                    _readyAt[key] = context.Time + cooldown;
+                }
             }
 
             return outcome;
+        }
+
+        private float CooldownFor(PlayerInteractionContext context, string targetId)
+        {
+            float cooldown = DefaultCooldownSeconds;
+            if (cooldown > 0f && IsExpertFor != null && IsExpertFor(context.Role, targetId))
+            {
+                cooldown *= ExpertCooldownMultiplier;
+            }
+
+            return cooldown;
         }
 
         public void ClearCooldowns()

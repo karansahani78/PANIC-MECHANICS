@@ -1,4 +1,6 @@
+using System.Collections.Generic;
 using PanicMechanics.Core;
+using PanicMechanics.Gameplay.Lobby;
 using Unity.Netcode;
 using UnityEngine;
 
@@ -40,9 +42,31 @@ namespace PanicMechanics.Runtime
 
         public event System.Action<InteractionResultCode, string> InteractionResolved;
 
+        private readonly Dictionary<ulong, PlayerRole> _authoritativeRoles =
+            new Dictionary<ulong, PlayerRole>();
+
         private void Awake()
         {
             Instance = this;
+        }
+
+        public PlayerRole GetAuthoritativeRole(ulong clientId)
+        {
+            PlayerRole role;
+            if (_authoritativeRoles.TryGetValue(clientId, out role))
+            {
+                return role;
+            }
+
+            return PlayerRole.Dispatcher;
+        }
+
+        public void EnsureAuthoritativeRoles()
+        {
+            if (IsServer)
+            {
+                ReassignRoles();
+            }
         }
 
         public override void OnNetworkSpawn()
@@ -51,6 +75,14 @@ namespace PanicMechanics.Runtime
             {
                 return;
             }
+
+            if (NetworkManager != null)
+            {
+                NetworkManager.OnClientConnectedCallback += OnClientConnected;
+                NetworkManager.OnClientDisconnectCallback += OnClientDisconnected;
+            }
+
+            ReassignRoles();
 
             for (int i = 0; i < SubsystemCount; i++)
             {
@@ -67,6 +99,71 @@ namespace PanicMechanics.Runtime
             boot.Director.StartMission();
             _phase.Value = boot.Director.Phase;
             RefreshSubsystems();
+        }
+
+        public override void OnNetworkDespawn()
+        {
+            if (NetworkManager != null)
+            {
+                NetworkManager.OnClientConnectedCallback -= OnClientConnected;
+                NetworkManager.OnClientDisconnectCallback -= OnClientDisconnected;
+            }
+        }
+
+        private void OnClientConnected(ulong clientId)
+        {
+            if (IsServer)
+            {
+                ReassignRoles();
+            }
+        }
+
+        private void OnClientDisconnected(ulong clientId)
+        {
+            if (!IsServer)
+            {
+                return;
+            }
+
+            _authoritativeRoles.Remove(clientId);
+            ReassignRoles();
+        }
+
+        private void ReassignRoles()
+        {
+            if (!IsServer || NetworkManager == null)
+            {
+                return;
+            }
+
+            var ids = new List<ulong>();
+            foreach (var pair in NetworkManager.ConnectedClients)
+            {
+                ids.Add(pair.Key);
+            }
+
+            ids.Sort();
+
+            var assignments = RoleAssignmentService.Assign(ids);
+            _authoritativeRoles.Clear();
+            foreach (var pair in assignments)
+            {
+                _authoritativeRoles[pair.Key] = pair.Value;
+            }
+
+            foreach (var id in ids)
+            {
+                NetworkClient client;
+                if (NetworkManager.ConnectedClients.TryGetValue(id, out client) &&
+                    client.PlayerObject != null)
+                {
+                    var avatar = client.PlayerObject.GetComponent<PlayerAvatar>();
+                    if (avatar != null)
+                    {
+                        avatar.AuthorizeRole(GetAuthoritativeRole(id));
+                    }
+                }
+            }
         }
 
         private void Update()
@@ -125,7 +222,7 @@ namespace PanicMechanics.Runtime
 
             ulong clientId = rpcParams.Receive.SenderClientId;
             var context = new PlayerInteractionContext(
-                clientId, PlayerRole.Dispatcher, distance, boot.Director.Elapsed);
+                clientId, GetAuthoritativeRole(clientId), distance, boot.Director.Elapsed);
             var request = new InteractionRequest(targetId, actionId, clientId, 0u);
 
             var result = boot.Interactions.Submit(request, context);
