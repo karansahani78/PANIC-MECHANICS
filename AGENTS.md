@@ -38,10 +38,12 @@ run. Agents must run:
 - Standalone pure-core tests: `Tools/run-tests.sh` (`dotnet test`).
 - Record **actual** pass/fail counts; if a suite cannot run, say so.
 
-Latest actual baseline (2026-10-11): compile clean; EditMode 78/78; PlayMode 1/1;
-standalone 78/78; **two-client smoke test automated and passing** (host 1/1 on a
-project clone, client 1/1 joining over loopback, asserting host-assigned roles
-Engineer/Electrician).
+Latest actual baseline (2026-10-12): compile clean; EditMode **87/87**; PlayMode
+**1 passed / 4 gated-skip / 0 failed**; standalone **87/87**; **two-client loopback
+smoke test automated and passing** (host 1/1 on a project clone, client 1/1 joining
+over loopback, asserting host-assigned roles Engineer/Electrician). Relay smoke
+fixtures exist but are **gated off** (`PM_RELAY=1`, needs a linked Unity Cloud
+project) and **have not been verified against live clients**.
 
 ## Skills
 
@@ -64,11 +66,22 @@ Full write perms: `Docs/AGENT_TASKS.md`.
 
 ## Status
 
-**Milestone 0 complete (2026-10-11)** — the project compiles clean, EditMode 78/78
-and PlayMode 1/1 pass, the `00_Bootstrap` playable slice is generated, the
-**two-client** (host + joining client) smoke test is **automated and passing** on
-the pinned package set (`Tools/two-client-smoke.sh`; both fixtures `Assert.Ignore`
-unless `PM_TWOCLIENT=1`), and **roles are host-assigned and enforced**
-(Engineer/Electrician verified end-to-end; `RequestRoleServerRpc` removed). Broad
-parallel feature work may resume; keep changes scoped to owned folders and re-run
-the smoke script before claiming network changes.
+**Milestone 0 complete (2026-10-11)** — the project compiles clean, the
+`00_Bootstrap` playable slice is generated, the **two-client** (host + joining
+client) loopback smoke test is **automated and passing** on the pinned package set
+(`Tools/two-client-smoke.sh`; both fixtures `Assert.Ignore` unless `PM_TWOCLIENT=1`),
+and **roles are host-assigned and enforced** (Engineer/Electrician verified
+end-to-end; `RequestRoleServerRpc` removed).
+
+**Relay adapter added (2026-10-12)** — `MultiplayerServicesSessionService`
+implements `IGameSessionService` over the unified `com.unity.services.multiplayer`
+Sessions + Relay API; `GameBootstrap` selects it via `SessionBackend` or
+`PM_SESSION_BACKEND=ugs` (default stays `Local` for offline/tests). Error mapping is
+pure/tested (`PanicMechanics.Core.SessionErrorText`). Verified: EditMode **87/87**,
+PlayMode 1 passed/4 gated-skip, SimVerify **87/87**, loopback smoke PASS. **Live
+Relay is unverified** — blocked on linking a Unity Cloud project (see
+`Docs/RUNTIME_SETUP.md`); `Tools/relay-smoke.sh` (`PM_RELAY=1`) is the gate. Do not
+claim live Relay works until that script passes.
+
+Broad parallel feature work may resume; keep changes scoped to owned folders and
+re-run the smoke scripts before claiming network changes.

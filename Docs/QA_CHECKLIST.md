@@ -4,7 +4,10 @@ Owner: Agent 5 (Content + QA). Executed by humans/agents per milestone.
 
 ## Automated (record ACTUAL results + date; never claim unverified passes)
 
-- [ ] Unity project opens in the pinned 6.3 LTS patch, zero compile errors.
+- [x] Unity project opens in the pinned 6.3 LTS patch, zero compile errors. —
+      2026-10-12, batchmode `-quit`: 0 `error CS` (all assemblies).
+- [x] EditMode: full suite green. — 2026-10-12, **87/87** (includes the session
+      error-mapping tests `SessionErrorTextTests`).
 - [ ] EditMode: system dependency calculations.
 - [ ] EditMode: fault escalation thresholds.
 - [ ] EditMode: repair precondition validation.
@@ -17,7 +20,8 @@ Owner: Agent 5 (Content + QA). Executed by humans/agents per milestone.
 - [ ] PlayMode: replay resets all faults/timers.
 - [x] PlayMode: two clients see the same incident state. — 2026-10-11,
       `Tools/two-client-smoke.sh` (host on clone + client, loopback): phase/subsystems
-      replicated; HOST 1/1 + CLIENT 1/1.
+      replicated; HOST 1/1 + CLIENT 1/1. (Re-run 2026-10-12 after the Relay adapter:
+      still PASS.)
 - [x] PlayMode: invalid client interaction rejected by host. — 2026-10-11, same run:
       client `SubmitInteractionServerRpc(no_such_target,…)` → `InvalidTarget`
       returned and asserted by the client.
@@ -25,6 +29,9 @@ Owner: Agent 5 (Content + QA). Executed by humans/agents per milestone.
       avatar Engineer + joining client Electrician asserted on both sides; relay
       uses the host-assigned role; expert cooldown advantage verified in EditMode
       (`RoleExpertise` + `InteractionRoleAdvantage`).
+- [ ] PlayMode: Relay (Sessions) host+join. — adapter + gated fixtures exist
+      (`Tools/relay-smoke.sh`, `PM_RELAY=1`); **NOT RUN** — needs a linked Unity
+      Cloud project. Not a pass until the script is green.
 - [ ] PlayMode: HUD reacts to state changes. — Client HUD shows replicated values;
       input-driven HUD polish pending.
 
@@ -33,15 +40,20 @@ Owner: Agent 5 (Content + QA). Executed by humans/agents per milestone.
 - [ ] 2 players.  [ ] 3 players.  [ ] 4 players.
 - [ ] High latency + packet loss simulation.
 - [ ] Host leaves in lobby → clear message, no freeze.
-- [ ] Host leaves during mission → clean end, clients to menu.
+- [ ] Host leaves during mission → clean end, clients to menu. — adapter maps
+      `Deleted`/`RemovedFromSession` to `Disconnected`; UI surfacing pending.
 - [ ] Client leaves mid-interaction → no stale objects.
-- [ ] Invalid / expired join code → actionable error + retry.
-- [ ] Session service unavailable → actionable error.
+- [ ] Invalid / expired join code → actionable error + retry. — `SessionErrorText`
+      maps `SessionNotFound`/`InvalidSessionIdentifier` to "invalid code" (unit-tested);
+      round-trip pending live.
+- [ ] Session service unavailable → actionable error. — maps `MissingAssembly` /
+      init failure to "unavailable"; pending live.
 - [ ] Client spams interaction requests → host rate-limits.
 - [ ] Two clients interact with the same panel simultaneously.
 - [ ] Two clients repair the same incident simultaneously.
 - [ ] Mission ends while a client is joining.
-- [ ] Replaying does not preserve old faults/timers.
+- [ ] Hosting twice / duplicate session → `SessionConflict` / `AllocationAlreadyExists`
+      mapped to "already hosting" (unit-tested).
 
 ## Player-experience checks
 

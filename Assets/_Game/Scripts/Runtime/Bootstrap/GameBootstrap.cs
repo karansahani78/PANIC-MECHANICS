@@ -13,8 +13,17 @@ namespace PanicMechanics.Runtime
     {
         public static GameBootstrap Instance { get; private set; }
 
+        public const string SessionBackendEnvVar = "PM_SESSION_BACKEND";
+
+        public enum SessionBackend
+        {
+            Local,
+            MultiplayerServices
+        }
+
         [SerializeField] private MissionDefinitionSO mission;
         [SerializeField] private int fallbackPlayerCount = 2;
+        [SerializeField] private SessionBackend sessionBackend = SessionBackend.Local;
 
         public MissionDirector Director { get; private set; }
         public InteractionService Interactions { get; private set; }
@@ -40,7 +49,7 @@ namespace PanicMechanics.Runtime
 
         private void Build()
         {
-            Session = new LocalGameSessionService();
+            Session = CreateSessionService();
 
             int players = fallbackPlayerCount;
             MissionConfig config = mission != null
@@ -66,6 +75,24 @@ namespace PanicMechanics.Runtime
             {
                 Register(Director.Incidents[i]);
             }
+        }
+
+        private IGameSessionService CreateSessionService()
+        {
+            bool useMultiplayerServices = sessionBackend == SessionBackend.MultiplayerServices;
+
+            string overrideValue = Environment.GetEnvironmentVariable(SessionBackendEnvVar);
+            if (!string.IsNullOrEmpty(overrideValue))
+            {
+                useMultiplayerServices = string.Equals(overrideValue, "ugs", StringComparison.OrdinalIgnoreCase);
+            }
+
+            if (useMultiplayerServices)
+            {
+                return new MultiplayerServicesSessionService();
+            }
+
+            return new LocalGameSessionService();
         }
 
         private void Register(IncidentController incident)

@@ -8,7 +8,10 @@
         "Unity.Netcode.Runtime",
         "Unity.InputSystem",
         "Unity.TextMeshPro",
-        "UnityEngine.UI"
+        "UnityEngine.UI",
+        "Unity.Services.Multiplayer",
+        "Unity.Services.Core",
+        "Unity.Services.Authentication"
     ],
     "includePlatforms": [],
     "excludePlatforms": [],

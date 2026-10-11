@@ -1,8 +1,10 @@
 # PANIC MECHANICS — Runtime Setup (Unity Editor steps)
 
-**Status: VERIFIED (2026-10-11).** The project compiles in batchmode with zero
-errors and the host smoke test passes. The runtime layer now lives in its own
-`PanicMechanics.Runtime` assembly.
+**Status: VERIFIED (2026-10-12).** The project compiles in batchmode with zero
+errors; EditMode 87/87, PlayMode 1 passed / 4 gated-skip, SimVerify 87/87, and the
+two-client loopback smoke test pass. The runtime layer now lives in its own
+`PanicMechanics.Runtime` assembly. Live Relay is implemented and unit-covered but
+**not yet verified** (no Cloud project linked).
 
 ## Generated already (no manual steps required)
 
@@ -43,14 +45,61 @@ verified.
 
 | File | Role |
 |---|---|
-| `Runtime/Bootstrap/GameBootstrap.cs` | Builds `MissionDirector` + `InteractionService`, registers incident interaction targets, owns `LocalGameSessionService` |
-| `Runtime/Networking/LocalGameSessionService.cs` | `IGameSessionService` over NGO loopback (host/client on `127.0.0.1`) — dev/smoke-test only |
+| `Runtime/Bootstrap/GameBootstrap.cs` | Builds `MissionDirector` + `InteractionService`, registers incident interaction targets, selects the `IGameSessionService` backend (`Local` by default, `MultiplayerServices` when requested) |
+| `Runtime/Networking/LocalGameSessionService.cs` | `IGameSessionService` over NGO loopback (host/client on `127.0.0.1`) — offline dev + automated smoke tests |
+| `Runtime/Networking/MultiplayerServicesSessionService.cs` | `IGameSessionService` over Unity Multiplayer Services **Sessions + Relay** (unified `com.unity.services.multiplayer` API); needs a linked Unity Cloud project |
 | `Runtime/Networking/NetworkGameManager.cs` | Host-authoritative: ticks the sim, replicates phase/elapsed/subsystem states, assigns roles (join order), validates interaction `ServerRpc`s with the assigned role |
 | `Runtime/Networking/SubsystemNetState.cs` | `INetworkSerializable` snapshot of a `TrainSubsystemState` |
 | `Runtime/Player/PlayerAvatar.cs` | Owner-driven CharacterController + Input System move/look/interact; `_role` server-authorized on spawn |
 | `Runtime/Interaction/InteractableStation.cs` | Marker with `targetId`/`actionId`/`prompt` on a collider |
 | `Runtime/UI/HudController.cs` | Reads replicated state into TMP labels |
-| `Runtime/UI/SessionMenuController.cs` | Host/Join buttons → `IGameSessionService` |
+| `Runtime/UI/SessionMenuController.cs` | Host/Join buttons → `IGameSessionService`; shows a runtime status/join-code label |
+
+## Session backends
+
+`GameBootstrap` exposes a serialized `SessionBackend { Local, MultiplayerServices }`
+(default **Local**). The environment variable `PM_SESSION_BACKEND=ugs` overrides it
+to `MultiplayerServices` at runtime, so automated runs and the shipped default stay
+on loopback while a dev can test Relay without editing the scene.
+
+`MultiplayerServicesSessionService` (`IGameSessionService`) performs, on first use:
+
+1. `UnityServices.InitializeAsync()` (idempotent; `Unity.Services.Core`).
+2. `AuthenticationService.Instance.SignInAnonymouslyAsync()` when not signed in.
+3. Host: `MultiplayerService.Instance.CreateSessionAsync(new SessionOptions {
+   Name, MaxPlayers, IsPrivate = true }.WithRelayNetwork())` → the MPS SDK allocates
+   Relay, points the scene `UnityTransport` at it, and starts NGO **Host** on
+   `NetworkManager.Singleton` (the same in-scene `NetworkManager`). `session.Code` is
+   the shareable join code.
+4. Join: `MultiplayerService.Instance.JoinSessionByCodeAsync(code)`; the SDK reads the
+   session's network property and connects NGO **Client** over Relay.
+
+Host-authoritative roles (`NetworkGameManager`) and the `InteractionService`
+expertise/cooldown rules are unchanged — the adapter only swaps how the transport
+connects. Errors are mapped to user text by `PanicMechanics.Core.SessionErrorText`
+(pure, unit-tested). Failed creates/joins clean up any leaked session and shut down
+the `NetworkManager`.
+
+### Unity Cloud project linkage (required for live Relay)
+
+Live Relay/Sessions require the Unity project to be linked to a Unity Cloud project.
+This is an editor/Dashboard step and must be done once by a human:
+
+1. Open the project in Unity **6000.3.26f1**.
+2. **Edit → Project Settings → Services** (or **Window → Unity Services → General**)
+   and **Link** the project to a Unity Cloud organization/project. Create a free
+   project if needed.
+3. In the [Unity Cloud Dashboard](https://cloud.unity.com) → your project →
+   **Services**, enable **Authentication**, **Relay**, and **Multiplayer / Sessions**.
+4. Confirm anonymous sign-in is allowed (Authentication → Sign-in providers →
+   **Anonymous** enabled).
+5. Verify linkage: `ProjectSettings/ProjectSettings.asset` should show a non-empty
+   `cloudProjectId` (currently empty in this repo). Do **not** commit secrets;
+   the Cloud project id lives in `ProjectSettings.asset` and is not a secret.
+
+Without a linked project, `InitializeAsync`/sign-in/Relay will fail; the adapter
+returns a failed `SessionOperationResult` with a readable message and the app stays
+on the loopback backend. `LocalGameSessionService` remains the offline/test path.
 
 ## Scene: `00_Bootstrap`
 
@@ -123,8 +172,27 @@ Manual alternative (uses the same loopback path; not needed for the gate):
    feedback key appears on the client HUD.
 5. Record actual pass/fail in `Docs/QA_CHECKLIST.md`.
 
+## Relay smoke test (requires a linked Cloud project)
+
+`Tools/relay-smoke.sh` mirrors the loopback script but drives the Relay adapter:
+the host (on an APFS clone) creates a Relay session with
+`PM_SESSION_BACKEND=ugs` and writes `session.Code` to a marker file; the client
+(on the repo) reads it and joins by code. Both fixtures
+(`RelayHostSmokeTests`, `RelayClientSmokeTests`) `Assert.Ignore` unless
+`PM_RELAY=1`, so ordinary PlayMode runs skip them.
+
+```text
+$ ./Tools/relay-smoke.sh .     # after linking a Unity Cloud project
+RELAY_SMOKE_PASS
+```
+
+**Not yet verified** — no Unity Cloud project is linked in this repo yet
+(`ProjectSettings.asset` `cloudProjectId` is empty), so Relay has not been run
+against live clients. Do not claim live Relay works until this script passes.
+
 ## Deferred (not in this scaffold)
 
-- Relay/`MultiplayerServicesSessionService` (internet join) — loopback only for now.
+- Live Relay verification (adapter + gated smoke test exist; blocked on Cloud
+  project linkage above).
 - Host migration, dedicated servers, Steam.
 - Full locomotion/animation, audio, accessibility.
