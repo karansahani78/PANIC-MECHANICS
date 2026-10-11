@@ -89,8 +89,28 @@ id + action + distance and never mutates state (see `Docs/CONTRACTS.md` §5).
 
 ## Two-client smoke test
 
-The **host** leg is automated (`HostSmokeTests`, PlayMode, passing). The
-**client-join** leg is still manual:
+**Automated and passing (2026-10-11).** Unity cannot open the same project twice,
+so `Tools/two-client-smoke.sh` runs the **host** on an APFS clone of the project
+(`cp -cR`) and the **client** on the repo, then parses both NUnit XML results:
+
+```text
+$ ./Tools/two-client-smoke.sh .
+TWO_CLIENT_SMOKE_PASS    # HOST 1/1 + CLIENT 1/1 over 127.0.0.1:7777
+```
+
+- Both fixtures (`HostProcessSmokeTests.HostServesClientJoinAndTicks`,
+  `ClientProcessSmokeTests.ClientJoinsAndSeesReplicatedState`) `Assert.Ignore`
+  unless `PM_TWOCLIENT=1`, so ordinary EditMode/PlayMode runs don't time out.
+  The script exports it before launching either editor.
+- Host fixture writes a marker, waits for a real client join **and** its
+  departure, then asserts the mission reached `Running`, the clock advanced, and
+  subsystems replicated. The client fixture joins via
+  `IGameSessionService.JoinByCodeAsync("LOCAL")`, asserts the replicated
+  phase/clock/subsystem count, then sends an invalid interaction `ServerRpc` and
+  asserts the host-validated `InvalidTarget` rejection comes back over the wire.
+- Debug artifacts (logs + XML) are copied to `/tmp/pm-smoke-latest`.
+
+Manual alternative (uses the same loopback path; not needed for the gate):
 
 1. Open the project in Unity **6000.3.26f1**.
 2. Use **Multiplayer Play Mode** (Window → Multiplayer Play Mode) with one virtual

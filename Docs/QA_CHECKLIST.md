@@ -15,9 +15,14 @@ Owner: Agent 5 (Content + QA). Executed by humans/agents per milestone.
 - [ ] EditMode: deterministic mission seed behavior.
 - [ ] PlayMode: start → trigger → repair → resolve.
 - [ ] PlayMode: replay resets all faults/timers.
-- [ ] PlayMode: HUD reacts to state changes.
-- [ ] PlayMode: two clients see the same incident state.
-- [ ] PlayMode: invalid client interaction rejected by host.
+- [x] PlayMode: two clients see the same incident state. — 2026-10-11,
+      `Tools/two-client-smoke.sh` (host on clone + client, loopback): phase/subsystems
+      replicated; HOST 1/1 + CLIENT 1/1.
+- [x] PlayMode: invalid client interaction rejected by host. — 2026-10-11, same run:
+      client `SubmitInteractionServerRpc(no_such_target,…)` → `InvalidTarget`
+      returned and asserted by the client.
+- [ ] PlayMode: HUD reacts to state changes. — Client HUD shows replicated values;
+      input-driven HUD polish pending.
 
 ## Manual multiplayer QA (real remote required for final validation)
 

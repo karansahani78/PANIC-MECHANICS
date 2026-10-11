@@ -39,7 +39,8 @@ run. Agents must run:
 - Record **actual** pass/fail counts; if a suite cannot run, say so.
 
 Latest actual baseline (2026-10-11): compile clean; EditMode 69/69; PlayMode 1/1;
-standalone 69/69.
+standalone 69/69; **two-client smoke test automated and passing** (host 1/1 on a
+project clone, client 1/1 joining over loopback).
 
 ## Skills
 
@@ -62,8 +63,9 @@ Full write perms: `Docs/AGENT_TASKS.md`.
 
 ## Status
 
-Bootstrapped — the project compiles clean, EditMode 69/69 and PlayMode 1/1 pass,
-and the `00_Bootstrap` playable slice is generated. The **two-client** (host +
-joining client) smoke test is the remaining Milestone 0 gate; until it passes on
-the pinned package set, avoid broad parallel feature work and keep changes scoped
-to owned folders.
+**Milestone 0 complete (2026-10-11)** — the project compiles clean, EditMode 69/69
+and PlayMode 1/1 pass, the `00_Bootstrap` playable slice is generated, and the
+**two-client** (host + joining client) smoke test is **automated and passing** on
+the pinned package set (`Tools/two-client-smoke.sh`; both fixtures `Assert.Ignore`
+unless `PM_TWOCLIENT=1`). Broad parallel feature work may resume; keep changes
+scoped to owned folders and re-run the smoke script before claiming network changes.
