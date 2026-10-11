@@ -1,4 +1,5 @@
 using System.Collections.Generic;
+using PanicMechanics.Gameplay.Missions;
 using UnityEngine;
 
 namespace PanicMechanics.Data
@@ -20,5 +21,27 @@ namespace PanicMechanics.Data
         [Header("Difficulty modifiers")]
         [Range(0.5f, 2f)]
         public float DifficultyScale = 1f;
+
+        public MissionConfig ToConfig(int players)
+        {
+            var config = new MissionConfig
+            {
+                Id = Id,
+                TargetDurationSeconds = TargetDurationSeconds,
+                Players = players,
+                DifficultyScale = DifficultyScale,
+                Incidents = new List<IncidentConfig>()
+            };
+
+            for (int i = 0; i < Incidents.Count; i++)
+            {
+                if (Incidents[i] != null)
+                {
+                    config.Incidents.Add(Incidents[i].ToConfig());
+                }
+            }
+
+            return config;
+        }
     }
 }

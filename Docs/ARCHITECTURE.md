@@ -17,6 +17,8 @@ Implemented today:
 - `Assets/_Game/Scripts/Gameplay/` — `PanicMechanics.Gameplay.asmdef` (pure; no engine refs)
   - `Simulation/` — train model, mission director, incidents (overheat/powerfault/brakeleak), scoring, event log, report
   - `Interaction/` — `InteractionService` (host validation routing), `IncidentInteractionTarget`, `RoleInformationService`
+  - `Missions/` — `MissionConfig`/`IncidentConfig` + `MissionBuilder` (content → director, applies difficulty)
+  - `Lobby/` — `RoleAssignmentService`
 - `Assets/_Game/Scripts/Data/` — `PanicMechanics.Data.asmdef` (engine; ScriptableObject defs)
 - `Assets/_Game/Scripts/Runtime/` — **engine/network layer, no asmdef (Assembly-CSharp), UNVERIFIED**: `GameBootstrap`, `LocalGameSessionService`, `NetworkGameManager`, `PlayerAvatar`, `InteractableStation`, `HudController`, `SessionMenuController`
 - `Assets/_Game/Tests/EditMode/` — `PanicMechanics.Tests.EditMode.asmdef`
@@ -124,7 +126,7 @@ the stack is verified.
 `Tools/SimVerify/` is a standalone .NET NUnit project (`net10.0`, `LangVersion 9.0`)
 that links `Core` + `Gameplay` source and the `Tests/EditMode` files directly, so
 the pure gameplay rules compile and test without the Unity Editor. Latest actual
-result: **49 passed / 0 failed**. This is the fallback test path until the editor
+result: **57 passed / 0 failed**. This is the fallback test path until the editor
 is licensed; the same test files also run under Unity Test Framework (EditMode).
 
 ## 4. Runtime services & composition

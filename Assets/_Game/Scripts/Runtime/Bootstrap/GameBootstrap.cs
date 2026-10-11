@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using PanicMechanics.Core;
 using PanicMechanics.Data;
 using PanicMechanics.Gameplay.Interaction;
+using PanicMechanics.Gameplay.Missions;
 using PanicMechanics.Gameplay.Simulation;
 using UnityEngine;
 
@@ -42,42 +43,30 @@ namespace PanicMechanics.Runtime
             Session = new LocalGameSessionService();
 
             int players = fallbackPlayerCount;
-            float duration = mission != null ? mission.TargetDurationSeconds : 300f;
-            string id = mission != null ? mission.Id : "mission.default";
+            MissionConfig config = mission != null
+                ? mission.ToConfig(players)
+                : new MissionConfig { Players = players };
 
-            Director = new MissionDirector(id, players, duration);
+            if (config.Incidents.Count == 0)
+            {
+                config.Incidents.Add(IncidentConfig.Overheat());
+            }
+
+            Director = MissionBuilder.Build(config);
             Interactions = new InteractionService(() => Director.Phase)
             {
                 MaxDistance = IncidentController.MaxInteractionDistance
             };
             Director.PhaseChanged += OnPhaseChanged;
 
-            if (mission != null && mission.Incidents != null && mission.Incidents.Count > 0)
+            for (int i = 0; i < Director.Incidents.Count; i++)
             {
-                for (int i = 0; i < mission.Incidents.Count; i++)
-                {
-                    var definition = mission.Incidents[i];
-                    if (definition == null)
-                    {
-                        continue;
-                    }
-
-                    var incident = definition.Build(Director.Model, Director.Log);
-                    if (incident != null)
-                    {
-                        Register(incident);
-                    }
-                }
-            }
-            else
-            {
-                Register(new OverheatIncident(Director.Model, Director.Log));
+                Register(Director.Incidents[i]);
             }
         }
 
         private void Register(IncidentController incident)
         {
-            Director.AddIncident(incident);
             var target = new IncidentInteractionTarget(incident);
             _targets[target.TargetId] = target;
             Interactions.RegisterTarget(target);

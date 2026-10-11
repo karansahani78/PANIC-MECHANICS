@@ -14,7 +14,7 @@ Unity Multiplayer Services (sessions/Relay).
 - The Unity project scaffold exists: `Packages/manifest.json`,
   `ProjectSettings/ProjectVersion.txt`, assembly definitions, and content folders.
 - The gameplay core (enums/contracts/models + simulation + interaction validation)
-  is **Unity-free** and verified: `dotnet test` → **49 passed / 0 failed**.
+  is **Unity-free** and verified: `dotnet test` → **57 passed / 0 failed**.
 - A host-authoritative runtime scaffold exists under
   `Assets/_Game/Scripts/Runtime/` (session service, network replication,
   interaction relay, player, HUD) but is **unverified** — see
@@ -57,14 +57,15 @@ source directly, mirroring Unity C# 9 and the NUnit constraint API).
 
 ```text
 $ dotnet test Tools/SimVerify/SimVerify.csproj
-Passed!  - Failed: 0, Passed: 49, Skipped: 0, Total: 49
+Passed!  - Failed: 0, Passed: 57, Skipped: 0, Total: 57
 ```
 
 Covered: `TrainSystemModel`, the three incidents (`OverheatIncident`,
 `PowerFaultIncident`, `BrakeLeakIncident`), `MissionDirector`,
 `MissionScorer`/report, `DifficultyScaler`, `InteractionService`
 (phase/distance/cooldown/rejection routing + result-source passthrough),
-`IncidentInteractionTarget`, and `RoleInformationService` role visibility.
+`IncidentInteractionTarget`, `MissionBuilder`/`MissionConfig`,
+`RoleAssignmentService`, and `RoleInformationService` role visibility.
 
 **Not yet verified:** Unity compile of `Data` + `Runtime`, package restore, and
 the two-client multiplayer smoke test. These require opening the licensed editor.

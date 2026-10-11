@@ -1,4 +1,5 @@
 using PanicMechanics.Core;
+using PanicMechanics.Gameplay.Missions;
 using PanicMechanics.Gameplay.Simulation;
 using UnityEngine;
 
@@ -20,6 +21,24 @@ namespace PanicMechanics.Data
         public float StabilizeTemperature = 0.30f;
         public float StableHoldSeconds = 2f;
         public float ReduceLoadAmount = 0.15f;
+
+        public IncidentConfig ToConfig()
+        {
+            return new IncidentConfig
+            {
+                Id = Id,
+                Kind = Kind,
+                Subsystem = Subsystem,
+                ActivateAfter = ActivateAfterSeconds,
+                SeverityWeight = SeverityWeight,
+                SymptomTemperature = SymptomTemperature,
+                EscalateTemperature = EscalateTemperature,
+                FailTemperature = FailTemperature,
+                StabilizeTemperature = StabilizeTemperature,
+                StableHoldSeconds = StableHoldSeconds,
+                ReduceLoadAmount = ReduceLoadAmount
+            };
+        }
 
         public IncidentController Build(TrainSystemModel model, MissionEventLog log)
         {
